@@ -1,0 +1,5 @@
+# Pinned Linux kernel version that this translation tracks.
+# The build clones torvalds/linux at this tag and overlays ru/Documentation/.
+KERNEL_TAG=v7.0
+KERNEL_SHA=028ef9c96e96197026887c0f092424679298aae8
+KERNEL_REPO=https://github.com/torvalds/linux.git

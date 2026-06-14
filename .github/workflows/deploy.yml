@@ -1,0 +1,67 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ru/**"
+      - "scripts/**"
+      - "KERNEL_PIN"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+# Allow the GITHUB_TOKEN to deploy to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deploy at a time; don't cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout translation repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y rsync
+
+      - name: Build the site
+        run: scripts/build.sh
+
+      - name: Assemble _site (drop doctrees / pycache)
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          rsync -a --delete \
+            --exclude '.doctrees' \
+            --exclude '__pycache__' \
+            build/linux/output/ _site/
+          # GitHub Pages skips files/dirs starting with "_" unless .nojekyll exists.
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

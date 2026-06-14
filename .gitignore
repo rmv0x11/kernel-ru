@@ -1,0 +1,8 @@
+# Build artifacts and tooling — never committed.
+/build/
+/.venv/
+/.idea/
+__pycache__/
+*.pyc
+deny-vf
+.DS_Store

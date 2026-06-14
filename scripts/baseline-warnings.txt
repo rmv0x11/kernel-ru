@@ -1,0 +1,15 @@
+Documentation/arch/riscv/zicfilp.rst: WARNING: Inline literal start-string without end-string. [docutils]
+Documentation/core-api/kref: ./include/linux/kref.h: WARNING: Invalid C declaration: Expected end of definition. [error at 92]
+Documentation/core-api/kref: ./include/linux/kref.h: WARNING: Invalid C declaration: Expected end of definition. [error at 96]
+Documentation/driver-api/basics: ./kernel/time/time.c: WARNING: Duplicate C declaration, also defined at driver-api/basics.
+Documentation/gpu/drm-kms: ./drivers/gpu/drm/drm_fourcc.c: WARNING: Duplicate C declaration, also defined at gpu/drm-kms.
+Documentation/gpu/drm-kms: ./drivers/gpu/drm/drm_modeset_lock.c: WARNING: Duplicate C declaration, also defined at gpu/drm-kms.
+Documentation/gpu/drm-uapi: ./drivers/gpu/drm/drm_ioctl.c: WARNING: Duplicate C declaration, also defined at gpu/drm-uapi.
+Documentation/gpu/xe/xe_mm: ./drivers/gpu/drm/xe/xe_ggtt_types.h: ERROR: Unexpected indentation. [docutils]
+WARNING: ./include/crypto/skcipher.h struct member 'SKCIPHER_ALG_COMMON' not described in 'skcipher_alg'
+WARNING: ./include/linux/usb/typec_altmode.h struct member 'mode_selection' not described in 'typec_altmode'
+WARNING: ./include/linux/usb/typec_altmode.h struct member 'priority' not described in 'typec_altmode'
+WARNING: ./include/linux/virtio.h struct member 'map' not described in 'virtio_device'
+WARNING: ./include/linux/virtio.h struct member 'VIRTIO_DECLARE_FEATURES(features' not described in 'virtio_device'
+WARNING: ./include/linux/virtio.h struct member 'vmap' not described in 'virtio_device'
+WARNING: dot(1) not found, for better output quality install graphviz from https://www.graphviz.org
