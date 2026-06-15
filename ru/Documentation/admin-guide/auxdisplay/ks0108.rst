@@ -1,0 +1,50 @@
+============================================
+Документация драйвера LCD-контроллера ks0108
+============================================
+
+:License:		GPLv2
+:Author & Maintainer:	Miguel Ojeda <ojeda@kernel.org>
+:Date:			2006-10-27
+
+
+
+.. INDEX
+
+	1. DRIVER INFORMATION
+	2. DEVICE INFORMATION
+	3. WIRING
+
+
+1. Информация о драйвере
+------------------------
+
+Этот драйвер поддерживает LCD-контроллер ks0108.
+
+
+2. Информация об устройстве
+---------------------------
+
+:Manufacturer:	Samsung
+:Device Name:	KS0108 LCD Controller
+:Device Code:	ks0108
+:Webpage:	-
+:Device Webpage: -
+:Type:		LCD Controller (Liquid Crystal Display Controller)
+:Width:		64
+:Height:	64
+:Colors:	2 (B/N)
+:Pages:		8
+:Addresses:	64 each page
+:Data size:	1 byte each address
+:Memory size:	8 * 64 * 1 = 512 bytes
+
+
+3. Подключение
+--------------
+
+Драйвер поддерживает подключение через параллельный порт для передачи данных.
+
+Если вы не занимаетесь сборкой оборудования, связанного с LCD, обратитесь к
+информации о подключении, специфичной для вашего LCD, в той же папке.
+
+Например, см. Documentation/admin-guide/auxdisplay/cfag12864b.rst
