@@ -8,12 +8,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG="$ROOT/build/verify.log"
 BASE="$ROOT/scripts/baseline-warnings.txt"
+VENV="$ROOT/.venv"
 
-# 1. Apply the deterministic RST heading-underline fixer to all translated files.
-if compgen -G "$ROOT/ru/Documentation/**/*.rst" >/dev/null 2>&1 || \
-   find "$ROOT/ru/Documentation" -name '*.rst' -print -quit | grep -q .; then
+# 1. Apply the deterministic RST fixers to all translated files:
+#    - fix_headings.py: lengthen section-title underlines (stdlib only);
+#    - fix_lists.py: insert the blank line RST needs between a multi-line paragraph
+#      and an indented list (docutils-driven, so run with the venv's python).
+if find "$ROOT/ru/Documentation" -name '*.rst' -print -quit | grep -q .; then
+  PYBIN="python3"; [ -x "$VENV/bin/python" ] && PYBIN="$VENV/bin/python"
   find "$ROOT/ru/Documentation" -name '*.rst' -print0 \
     | xargs -0 python3 "$ROOT/scripts/fix_headings.py" >/dev/null || true
+  find "$ROOT/ru/Documentation" -name '*.rst' -print0 \
+    | xargs -0 "$PYBIN" "$ROOT/scripts/fix_lists.py" >/dev/null || true
 fi
 
 # 2. Full incremental build (re-reads only changed docs; ~fast with warm doctree).
