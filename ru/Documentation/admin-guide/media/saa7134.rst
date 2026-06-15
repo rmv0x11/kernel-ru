@@ -1,0 +1,88 @@
+.. SPDX-License-Identifier: GPL-2.0
+
+Драйвер saa7134
+===============
+
+Автор: Gerd Hoffmann
+
+
+Это драйвер устройства v4l2/oss для плат захвата / TV на базе saa7130/33/34/35.
+
+
+Состояние
+---------
+
+Работает почти всё: видео, звук, тюнер, радио, mpeg ts, ...
+
+Как и в случае с bttv, требуются специфичные для платы настройки. Список известных
+TV-плат смотрите в CARDLIST, а информацию о конфигурации плат для драйвера —
+в saa7134-cards.c.
+
+
+Сборка
+------
+
+Получив исходный код ядра, вам следует сконфигурировать, собрать,
+установить и загрузить новое ядро. Вам понадобятся как минимум
+следующие опции конфигурации::
+
+    ./scripts/config -e PCI
+    ./scripts/config -e INPUT
+    ./scripts/config -m I2C
+    ./scripts/config -m MEDIA_SUPPORT
+    ./scripts/config -e MEDIA_PCI_SUPPORT
+    ./scripts/config -e MEDIA_ANALOG_TV_SUPPORT
+    ./scripts/config -e MEDIA_DIGITAL_TV_SUPPORT
+    ./scripts/config -e MEDIA_RADIO_SUPPORT
+    ./scripts/config -e RC_CORE
+    ./scripts/config -e MEDIA_SUBDRV_AUTOSELECT
+    ./scripts/config -m VIDEO_SAA7134
+    ./scripts/config -e SAA7134_ALSA
+    ./scripts/config -e VIDEO_SAA7134_RC
+    ./scripts/config -e VIDEO_SAA7134_DVB
+    ./scripts/config -e VIDEO_SAA7134_GO7007
+
+Для сборки и установки выполните::
+
+    make && make modules_install && make install
+
+После загрузки нового ядра драйвер saa7134 должен загрузиться автоматически.
+
+В зависимости от платы может потребоваться передать ``card=<nr>`` в качестве опции insmod.
+Если это так, проверьте допустимые значения в
+Documentation/admin-guide/media/saa7134-cardlist.rst.
+
+Узнав номер типа вашей платы, вы можете передать конфигурацию модулей
+через файл (обычно это либо ``/etc/modules.conf``, либо какой-то файл в
+``/etc/modules-load.d/``, но фактическое расположение зависит от вашего
+дистрибутива) со следующим содержимым::
+
+    options saa7134 card=13 # Assuming that your card type is #13
+
+
+Изменения / Исправления
+-----------------------
+
+Присылайте, пожалуйста, на linux-media AT vger.kernel.org унифицированные diff'ы
+относительно git-дерева linux media:
+
+    https://git.linuxtv.org/media.git/
+
+Это делается путём фиксации патча в клоне git-дерева и
+отправки патча с помощью ``git send-email``. Не забудьте
+описать в подробностях, что он меняет / какую проблему исправляет / для чего
+он вообще нужен ...
+
+
+Известные проблемы
+------------------
+
+* Тюнер для плат flyvideo не определяется автоматически, и
+  значение по умолчанию может у вас не работать в зависимости от того, какая у вас версия.
+  Существует опция insmod ``tuner=`` для переопределения значения по умолчанию в драйвере.
+
+Благодарности
+-------------
+
+andrew.stevens@philips.com + werner.leeb@philips.com за предоставление
+спецификаций оборудования saa7134 и образца платы.
