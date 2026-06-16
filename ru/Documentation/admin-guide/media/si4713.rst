@@ -1,0 +1,191 @@
+.. SPDX-License-Identifier: GPL-2.0
+
+.. include:: <isonum.txt>
+
+Драйвер FM-передатчика Silicon Labs Si4713
+==========================================
+
+Copyright |copy| 2009 Nokia Corporation
+
+Contact: Eduardo Valentin <eduardo.valentin@nokia.com>
+
+
+Сведения об устройстве
+----------------------
+
+Эта микросхема — продукт компании Silicon Labs. Это устройство I2C, в настоящее время по адресу 0x63.
+По сути, она обладает функциями передачи и измерения уровня шума сигнала.
+
+Si4713 объединяет функции передачи для FM-вещания в стереорежиме.
+Микросхема также позволяет выполнять интегрированное сканирование мощности приёма для
+выявления FM-каналов со слабым уровнем сигнала.
+
+Микросхема программируется с помощью команд и ответов. Существует также несколько
+свойств, которые могут изменять поведение этой микросхемы.
+
+Пользователи обязаны соблюдать местные нормы, регулирующие радиочастотную (RF) передачу.
+
+Описание драйвера устройства
+----------------------------
+
+Для работы с этим устройством существует два модуля. Один — это драйвер устройства I2C,
+а другой — платформенный драйвер.
+
+Драйвер устройства I2C экспортирует в ядро интерфейс v4l2-subdev.
+Ко всем свойствам также можно обращаться через интерфейс расширенных элементов управления v4l2,
+используя вызовы v4l2-subdev (g_ext_ctrls, s_ext_ctrls).
+
+Платформенный драйвер устройства экспортирует в пространство пользователя интерфейс radio-устройства v4l2.
+Поэтому он использует драйвер устройства I2C как подустройство, чтобы передавать команды
+пользователя реальному устройству. По сути, это обёртка над драйвером устройства I2C.
+
+Приложения могут использовать v4l2 radio API для задания частоты работы, состояния mute
+и т. д. Но большинство свойств устройства представлено в расширенных элементах управления.
+
+Когда свойство mute v4l2 устанавливается в 1 (true), драйвер выключает микросхему.
+
+Описание свойств
+----------------
+
+К свойствам можно обращаться с помощью расширенных элементов управления v4l2.
+Ниже приведён вывод утилиты v4l2-ctl:
+
+.. code-block:: none
+
+	/ # v4l2-ctl -d /dev/radio0 --all -L
+	Driver Info:
+		Driver name   : radio-si4713
+		Card type     : Silicon Labs Si4713 Modulator
+		Bus info      :
+		Driver version: 0
+		Capabilities  : 0x00080800
+			RDS Output
+			Modulator
+	Audio output: 0 (FM Modulator Audio Out)
+	Frequency: 1408000 (88.000000 MHz)
+	Video Standard = 0x00000000
+	Modulator:
+		Name                 : FM Modulator
+		Capabilities         : 62.5 Hz stereo rds
+		Frequency range      : 76.0 MHz - 108.0 MHz
+		Subchannel modulation: stereo+rds
+
+	User Controls
+
+				mute (bool) : default=1 value=0
+
+	FM Radio Modulator Controls
+
+		rds_signal_deviation (int)  : min=0 max=90000 step=10 default=200 value=200 flags=slider
+			rds_program_id (int)  : min=0 max=65535 step=1 default=0 value=0
+		rds_program_type (int)  : min=0 max=31 step=1 default=0 value=0
+			rds_ps_name (str)  : min=0 max=96 step=8 value='si4713  '
+			rds_radio_text (str)  : min=0 max=384 step=32 value=''
+	audio_limiter_feature_enabled (bool) : default=1 value=1
+	audio_limiter_release_time (int)  : min=250 max=102390 step=50 default=5010 value=5010 flags=slider
+		audio_limiter_deviation (int)  : min=0 max=90000 step=10 default=66250 value=66250 flags=slider
+	audio_compression_feature_enabl (bool) : default=1 value=1
+		audio_compression_gain (int)  : min=0 max=20 step=1 default=15 value=15 flags=slider
+	audio_compression_threshold (int)  : min=-40 max=0 step=1 default=-40 value=-40 flags=slider
+	audio_compression_attack_time (int)  : min=0 max=5000 step=500 default=0 value=0 flags=slider
+	audio_compression_release_time (int)  : min=100000 max=1000000 step=100000 default=1000000 value=1000000 flags=slider
+	pilot_tone_feature_enabled (bool) : default=1 value=1
+		pilot_tone_deviation (int)  : min=0 max=90000 step=10 default=6750 value=6750 flags=slider
+		pilot_tone_frequency (int)  : min=0 max=19000 step=1 default=19000 value=19000 flags=slider
+		pre_emphasis_settings (menu) : min=0 max=2 default=1 value=1
+		tune_power_level (int)  : min=0 max=120 step=1 default=88 value=88 flags=slider
+		tune_antenna_capacitor (int)  : min=0 max=191 step=1 default=0 value=110 flags=slider
+
+Ниже приведена их сводка:
+
+* Pilot — это слышимый тон, посылаемый устройством.
+
+- pilot_frequency - Задаёт частоту стереофонического пилот-тона.
+- pilot_deviation - Задаёт уровень частотной девиации пилот-тона.
+- pilot_enabled - Включает или отключает функцию пилот-тона.
+
+* Устройство si4713 способно применять аудиокомпрессию к
+  передаваемому сигналу.
+
+- acomp_enabled - Включает или отключает функцию управления динамическим диапазоном аудио.
+- acomp_gain - Задаёт усиление для управления динамическим диапазоном аудио.
+- acomp_threshold - Задаёт пороговый уровень для управления динамическим диапазоном аудио.
+- acomp_attack_time - Задаёт время атаки для управления динамическим диапазоном аудио.
+- acomp_release_time - Задаёт время восстановления для управления динамическим диапазоном аудио.
+
+* Limiter настраивает функцию ограничителя девиации аудио. После возникновения
+  чрезмерной девиации появляется возможность регулировать усиление входного каскада
+  аудиовхода и всегда предотвращать чрезмерную девиацию.
+
+- limiter_enabled - Включает или отключает функцию ограничителя.
+- limiter_deviation - Задаёт уровень частотной девиации аудио.
+- limiter_release_time - Задаёт время восстановления ограничителя.
+
+* Мощность настройки
+
+- power_level - Задаёт уровень выходной мощности для передачи сигнала.
+  antenna_capacitor - Выбирает значение конденсатора настройки антенны
+  вручную или автоматически, если задано нулевое значение.
+
+* Относящиеся к RDS
+
+- rds_ps_name - Задаёт поле RDS ps name для передачи.
+- rds_radio_text - Задаёт RDS radio text для передачи.
+- rds_pi - Задаёт поле RDS PI для передачи.
+- rds_pty - Задаёт поле RDS PTY для передачи.
+
+* Относящиеся к региону
+
+- preemphasis - задаёт предыскажение, применяемое при передаче.
+
+RNL
+---
+
+Это устройство также имеет интерфейс для измерения уровня принимаемого шума. Чтобы сделать
+это, следует выполнить ioctl на узле устройства. Ниже приведён пример кода:
+
+.. code-block:: none
+
+	int main (int argc, char *argv[])
+	{
+		struct si4713_rnl rnl;
+		int fd = open("/dev/radio0", O_RDWR);
+		int rval;
+
+		if (argc < 2)
+			return -EINVAL;
+
+		if (fd < 0)
+			return fd;
+
+		sscanf(argv[1], "%d", &rnl.frequency);
+
+		rval = ioctl(fd, SI4713_IOC_MEASURE_RNL, &rnl);
+		if (rval < 0)
+			return rval;
+
+		printf("received noise level: %d\n", rnl.rnl);
+
+		close(fd);
+	}
+
+Структура si4713_rnl и SI4713_IOC_MEASURE_RNL определены в
+include/linux/platform_data/media/si4713.h.
+
+Стерео/моно и подканалы RDS
+---------------------------
+
+Устройство также можно настроить, используя доступные подканалы для
+передачи. Чтобы сделать это, используйте ioctl S/G_MODULATOR и правильно настройте txsubchans.
+Обратитесь к спецификации V4L2 API для корректного использования этого ioctl.
+
+Тестирование
+------------
+Тестирование обычно выполняется с помощью утилиты v4l2-ctl для управления картами FM-тюнеров.
+Этот инструмент можно найти в репозитории v4l-dvb в каталоге v4l2-apps/util.
+
+Пример задания rds ps name:
+
+.. code-block:: none
+
+	# v4l2-ctl -d /dev/radio0 --set-ctrl=rds_ps_name="Dummy"
